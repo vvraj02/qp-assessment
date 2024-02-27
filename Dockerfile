@@ -1,26 +1,20 @@
-FROM node:16.15.1-alpine3.16
+# Use Node.js version 20 as base image
+FROM node:20
 
-WORKDIR /app
+# Set the working directory in the container
+WORKDIR /usr/src/app
 
+# Copy package.json and package-lock.json to the working directory
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy the rest of the application code
 COPY . .
 
-RUN npm config rm proxy
-RUN npm config rm https-proxy
-RUN npm config set registry http://registry.npmjs.org/
-# RUN npm set registry=https://registry.npmjs.org/
-RUN npm install --legacy-peer-deps
+# Expose the port the app runs on
+EXPOSE 3000
 
-# ENV NODE_ENV development
-RUN npm run build
-
-COPY package.json dist/
-
-RUN adduser -D myuser
-
-RUN chown -R myuser: /app
-
-ENV HOME /home/myuser
-
-USER myuser
-
-CMD ["node", "dist/main.js"]
+# Command to run your application
+CMD ["npm", "run", "start"]
