@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnApplicationBootstrap } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { GroceryModule } from './grocery/grocery.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
 import { JwtModule } from '@nestjs/jwt';
+import { DatabaseService } from './database.service';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` });
@@ -29,6 +30,12 @@ require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` });
     AuthModule
   ],
   controllers: [AppController],
-  providers: [],
+  providers: [DatabaseService],
 })
-export class AppModule { }
+export class AppModule implements OnApplicationBootstrap { 
+  constructor(private readonly databaseService: DatabaseService) {}
+
+  async onApplicationBootstrap() {
+    await this.databaseService.createDatabaseIfNotExists();
+  }
+}
